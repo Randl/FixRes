@@ -96,7 +96,7 @@ torch.cuda.empty_cache()
 
 #Model 2
 # Define the transforms need to convert ImageNet data to expected model input
-normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+normalize = transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
 input_transform = transforms.Compose([
     Resize(int((256 / 224) * 480)),
     transforms.CenterCrop(480),
