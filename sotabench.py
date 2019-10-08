@@ -5,6 +5,8 @@ import PIL
 import urllib.request
 import torch
 from imnet_evaluate.resnext_wsl import resnext101_32x48d_wsl
+from imnet_evaluate.pnasnet import pnasnet5large
+import torchvision.models as models
 
 
 def _is_pil_image(img):
@@ -59,7 +61,8 @@ class Resize(transforms.Resize):
     def __repr__(self):
         r = super().__repr__()
         return r[:-1] + ', largest={})'.format(self.largest)
-      
+ 
+#Model 1
 # Define the transforms need to convert ImageNet data to expected model input
 normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 input_transform = transforms.Compose([
@@ -89,3 +92,100 @@ ImageNet.benchmark(
     num_gpu=1,
     model_description="Official weights from the author's of the paper."
 )
+torch.cuda.empty_cache()
+
+#Model 2
+# Define the transforms need to convert ImageNet data to expected model input
+normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+input_transform = transforms.Compose([
+    Resize(int((256 / 224) * 480)),
+    transforms.CenterCrop(480),
+    transforms.ToTensor(),
+    normalize,
+])
+
+model=pnasnet5large(pretrained='imagenet')
+
+urllib.request.urlretrieve('https://dl.fbaipublicfiles.com/FixRes_data/FixRes_Pretrained_Models/PNASNet.pth', 'PNASNet.pth')
+pretrained_dict=torch.load('PNASNet.pth',map_location='cpu')['model']
+
+model_dict = model.state_dict()
+for k in model_dict.keys():
+    if(('module.'+k) in pretrained_dict.keys()):
+        model_dict[k]=pretrained_dict.get(('module.'+k))
+model.load_state_dict(model_dict)
+# Run the benchmark
+ImageNet.benchmark(
+    model=model,
+    paper_model_name='FixPNASNet-5',
+    paper_arxiv_id='1906.06423',
+    input_transform=input_transform,
+    batch_size=32,
+    num_gpu=1,
+    model_description="Official weights from the author's of the paper."
+)
+torch.cuda.empty_cache()
+
+#Model 3
+# Define the transforms need to convert ImageNet data to expected model input
+normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+input_transform = transforms.Compose([
+    Resize(int((256 / 224) * 320)),
+    transforms.CenterCrop(320),
+    transforms.ToTensor(),
+    normalize,
+])
+
+model= models.resnet50(pretrained=False)
+
+urllib.request.urlretrieve('https://dl.fbaipublicfiles.com/FixRes_data/FixRes_Pretrained_Models/ResNet50_CutMix_v2.pth', 'ResNet50_CutMix_v2.pth')
+pretrained_dict=torch.load('ResNet50_CutMix_v2.pth',map_location='cpu')['model']
+
+model_dict = model.state_dict()
+for k in model_dict.keys():
+    if(('module.'+k) in pretrained_dict.keys()):
+        model_dict[k]=pretrained_dict.get(('module.'+k))
+model.load_state_dict(model_dict)
+# Run the benchmark
+ImageNet.benchmark(
+    model=model,
+    paper_model_name='FixResNet-50 CutMix',
+    paper_arxiv_id='1906.06423',
+    input_transform=input_transform,
+    batch_size=64,
+    num_gpu=1,
+    model_description="Official weights from the author's of the paper."
+)
+torch.cuda.empty_cache()
+
+#Model 4
+# Define the transforms need to convert ImageNet data to expected model input
+normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+input_transform = transforms.Compose([
+    Resize(int((256 / 224) * 384)),
+    transforms.CenterCrop(384),
+    transforms.ToTensor(),
+    normalize,
+])
+
+model= models.resnet50(pretrained=False)
+
+urllib.request.urlretrieve('https://dl.fbaipublicfiles.com/FixRes_data/FixRes_Pretrained_Models/ResNet50_v2.pth', 'ResNet50_v2.pth')
+pretrained_dict=torch.load('ResNet50_v2.pth',map_location='cpu')['model']
+
+model_dict = model.state_dict()
+for k in model_dict.keys():
+    if(('module.'+k) in pretrained_dict.keys()):
+        model_dict[k]=pretrained_dict.get(('module.'+k))
+model.load_state_dict(model_dict)
+# Run the benchmark
+ImageNet.benchmark(
+    model=model,
+    paper_model_name='FixResNet-50',
+    paper_arxiv_id='1906.06423',
+    input_transform=input_transform,
+    batch_size=64,
+    num_gpu=1,
+    model_description="Official weights from the author's of the paper."
+)
+torch.cuda.empty_cache()
