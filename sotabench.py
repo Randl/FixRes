@@ -104,7 +104,7 @@ input_transform = transforms.Compose([
     normalize,
 ])
 
-model=pnasnet5large(pretrained='imagenet')
+model=pnasnet5large(pretrained=False)
 
 urllib.request.urlretrieve('https://dl.fbaipublicfiles.com/FixRes_data/FixRes_Pretrained_Models/PNASNet.pth', 'PNASNet.pth')
 pretrained_dict=torch.load('PNASNet.pth',map_location='cpu')['model']
